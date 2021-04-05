@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 const app = express();
 app.use(express.json());
 const {
-  models: { User },
+  models: { User, Note },
 } = require('./db');
 const path = require('path');
 
@@ -24,6 +24,17 @@ app.get('/api/auth', async (req, res, next) => {
     res.send(await User.byToken(req.headers.authorization));
   } catch (ex) {
     next(ex);
+  }
+});
+
+app.get('/api/:userId/notes', async (req, res, next) => {
+  try {
+    const user = await User.findByPk(req.params.userId, {
+      include: [{ model: Note }],
+    });
+    res.send(user.notes);
+  } catch (err) {
+    next(err);
   }
 });
 

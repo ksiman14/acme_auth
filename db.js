@@ -19,6 +19,13 @@ const User = conn.define('user', {
   password: STRING,
 });
 
+const Note = conn.define('note', {
+  text: STRING,
+});
+
+Note.belongsTo(User);
+User.hasMany(Note);
+
 User.byToken = async (token) => {
   try {
     const payload = jwt.verify(token, process.env.JWT);
@@ -70,6 +77,16 @@ const syncAndSeed = async () => {
   const [lucy, moe, larry] = await Promise.all(
     credentials.map((credential) => User.create(credential))
   );
+  const notes = [{ text: 'Note 1' }, { text: 'Note 2' }, { text: 'Note 3' }];
+
+  const [note1, note2, note3] = await Promise.all(
+    notes.map((note) => Note.create(note))
+  );
+
+  await lucy.addNote(note1);
+  await moe.addNote(note2);
+  await larry.addNote(note3);
+
   return {
     users: {
       lucy,
@@ -83,5 +100,6 @@ module.exports = {
   syncAndSeed,
   models: {
     User,
+    Note,
   },
 };
